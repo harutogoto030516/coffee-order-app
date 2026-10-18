@@ -1,0 +1,100 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>コーヒー豆 発注管理</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <main class="container">
+        <h1>コーヒー豆 発注管理</h1>
+        <p class="description">
+            現在庫数を入力すると、納品までの使用予定を考慮して発注数を計算します。
+        </p>
+
+        <section class="panel">
+            <h2>在庫数の入力</h2>
+
+            <form method="POST">
+                <div class="date-field">
+                    <label for="order_date">発注日</label>
+                    <input
+                        type="date"
+                        id="order_date"
+                        name="order_date"
+                        value="{{ selected_date }}"
+                        required
+                    >
+                </div>
+
+                <div class="stock-grid">
+                    {% for bean in beans %}
+                    <div class="stock-field">
+                        <label for="{{ bean }}">{{ bean }}</label>
+                        <div class="input-group">
+                            <input
+                                type="number"
+                                id="{{ bean }}"
+                                name="{{ bean }}"
+                                min="0"
+                                max="20"
+                                step="1"
+                                value="{{ current_stocks[bean] }}"
+                                required
+                            >
+                            <span>袋</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <button type="submit">発注数を計算</button>
+            </form>
+        </section>
+
+        {% if error %}
+        <div class="error">
+            {{ error }}
+        </div>
+        {% endif %}
+
+        {% if orders is not none %}
+        <section class="panel result-panel">
+            <h2>発注計算結果</h2>
+
+            <p class="delivery-date">
+                納品予定日：
+                <strong>{{ delivery_date.strftime('%Y年%m月%d日') }}</strong>
+            </p>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>豆</th>
+                            <th>現在庫</th>
+                            <th>予想使用量</th>
+                            <th>発注数</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for bean in beans %}
+                        <tr>
+                            <td>{{ bean }}</td>
+                            <td>{{ current_stocks[bean] }}袋</td>
+                            <td>{{ expected_usage[bean]|int }}袋</td>
+                            <td class="order-quantity">
+                                {{ orders[bean] }}袋
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        {% endif %}
+    </main>
+</body>
+</html>
